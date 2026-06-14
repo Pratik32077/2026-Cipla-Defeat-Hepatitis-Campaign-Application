@@ -1,0 +1,600 @@
+# CIPLA – DEFEAT HEPATITIS DOCTOR VIDEO MANAGEMENT PLATFORM
+
+## PROJECT OVERVIEW
+
+Build a production-ready, enterprise-grade Healthcare Campaign Management Platform for CIPLA's "Defeat Hepatitis" campaign.
+
+The platform will be used to manage approximately 7000+ doctors through multiple managers across India.
+
+The application must be:
+
+* Fully Responsive
+* Mobile First
+* Progressive Web App Ready
+* Optimized for Desktop
+* Optimized for Tablet
+* Optimized for Android Devices
+* Optimized for iOS Devices
+* Fast Loading
+* Enterprise Grade
+* Clean Healthcare UI
+* Modern Dashboard Design
+* Production Ready Architecture
+
+The application must work smoothly across:
+
+* Chrome
+* Safari
+* Edge
+* Firefox
+* Android Browser
+* iPhone Safari
+* iPad
+* Windows
+* macOS
+
+---
+
+# BRANDING
+
+## Dashboard Logo
+
+Use Cipla Logo in:
+
+* Admin Dashboard
+* Manager Dashboard
+
+Position:
+
+Top Left Corner
+
+---
+
+## Login Page Logos
+
+Display:
+
+1. Defeat Hepatitis
+2. Tenvir AF
+3. International Book Of Records
+
+Use professionally on login screen.
+
+---
+
+# DESIGN SYSTEM
+
+## Brand Colors
+
+Primary Maroon:
+#7A1512
+
+Dark Maroon:
+#5E0F0F
+
+Secondary Maroon:
+#944B4B
+
+Background:
+#F5F5F5
+
+White:
+#FFFFFF
+
+Text Dark:
+#1F2937
+
+---
+
+# UI STYLE
+
+Modern Healthcare Admin Dashboard with a Maroon/Burgundy brand identity.
+
+Requirements:
+
+* Clean White Layouts
+* Premium Healthcare Feel
+* Soft Shadows
+* Rounded Cards
+* Smooth Hover Effects
+* Professional Typography
+* Modern Dashboard Components
+* Responsive Tables
+* Beautiful Analytics Cards
+* Professional Data Visualization
+* Loading States
+* Skeleton Loaders
+* Mobile Responsive Navigation
+
+---
+
+# AUTHENTICATION
+
+Role Based Authentication
+
+Roles:
+
+1. Admin
+2. Manager
+
+Secure Login System
+
+Use:
+
+* JWT Authentication
+* Refresh Tokens
+* Secure Session Handling
+* Password Encryption (bcrypt)
+
+---
+
+# ADMIN ACCOUNTS
+
+Pre-configured Admin Accounts
+
+Admin 1
+
+Username:
+Pratik Tiwari
+
+Password:
+Pratik@1234
+
+Admin 2
+
+Username:
+Anusha Ramani
+
+Password:
+Anusha@1234
+
+Admin 3
+
+Username:
+Alok Dubey
+
+Password:
+Alok@1234
+
+Admin 4
+
+Username:
+Vaibhav Sipla
+
+Password:
+Vaibhav@1234
+
+Store passwords using bcrypt hash.
+
+---
+
+# MANAGER MANAGEMENT
+
+Admin can:
+
+* Add Manager
+* Edit Manager
+* Remove Manager
+* Activate Manager
+* Deactivate Manager
+* Assign Targets
+
+Manager Fields
+
+* Name
+* Employee Code
+* Email
+* Mobile
+* Region
+* Headquarters
+* Username
+* Password
+* Target Doctors
+
+Manager data should be imported from provided Excel.
+
+Total managers approximately 83.
+
+---
+
+# ADMIN DASHBOARD
+
+## Global Overview
+
+Display:
+
+Total Target Doctors
+
+7000
+
+Total Doctors Added
+
+Remaining Doctors
+
+Overall Progress %
+
+Total Managers
+
+Videos Generated
+
+Pending Videos
+
+Failed Videos
+
+---
+
+## Progress Analytics
+
+Manager Wise Progress
+
+Example:
+
+Manager A
+
+Target: 1000
+
+Completed: 650
+
+Progress: 65%
+
+---
+
+## Leaderboard
+
+Top Performing Managers
+
+Lowest Performing Managers
+
+---
+
+## Daily Tracker
+
+Today's Doctors Added
+
+Today's Videos Generated
+
+Today's Active Managers
+
+Today's Top Performer
+
+---
+
+## Analytics
+
+Language Wise Distribution
+
+City Wise Distribution
+
+Manager Wise Distribution
+
+Daily Trends
+
+Monthly Trends
+
+Video Generation Trends
+
+---
+
+# ADMIN FEATURES
+
+Admin Can:
+
+* View All Managers
+* View All Doctors
+* View All Videos
+* Download Any Video
+* Export Excel Reports
+* Export CSV Reports
+* View Analytics
+* View Progress Tracking
+
+Admin Cannot:
+
+* Add Doctors
+* Edit Doctors
+* Generate Videos
+
+---
+
+# MANAGER DASHBOARD
+
+Manager can only see their own data.
+
+Never show another manager's data.
+
+---
+
+## Dashboard Cards
+
+Total Doctors
+
+Videos Generated
+
+Pending Videos
+
+Failed Videos
+
+Completion %
+
+Assigned Target
+
+Remaining Target
+
+---
+
+# ADD DOCTOR FORM
+
+Fields
+
+Doctor Name *
+
+Specialization *
+
+City *
+
+Contact Number *
+
+Language *
+
+Doctor Image *
+
+Submit
+
+---
+
+# LANGUAGE DROPDOWN
+
+Hindi
+
+English
+
+Marathi
+
+Gujarati
+
+Telugu
+
+Tamil
+
+Punjabi
+
+Oriya
+
+Malayalam
+
+Kannada
+
+Bengali
+
+---
+
+# DUPLICATE VALIDATION
+
+Contact Number must be UNIQUE across the entire system.
+
+If duplicate:
+
+"This doctor already exists in the system."
+
+Do not allow duplicate creation.
+
+---
+
+# DOCTOR LIST
+
+Columns
+
+Doctor Name
+
+Specialization
+
+City
+
+Contact Number
+
+Language
+
+Status
+
+Created Date
+
+Actions
+
+---
+
+# ACTIONS
+
+View
+
+Edit
+
+Preview Video
+
+Download Video
+
+Export Data
+
+---
+
+# SEARCH & FILTERS
+
+Search:
+
+Doctor Name
+
+Contact Number
+
+Filters:
+
+Language
+
+City
+
+Status
+
+Date Range
+
+---
+
+# DOCTOR DETAILS PAGE
+
+Doctor Name
+
+Specialization
+
+City
+
+Contact Number
+
+Language
+
+Doctor Photo
+
+Generated Video
+
+Status
+
+Created Date
+
+Updated Date
+
+---
+
+# VIDEO MODULE
+
+Current Phase
+
+Create complete architecture.
+
+Statuses:
+
+Pending
+
+Processing
+
+Completed
+
+Failed
+
+Store video URLs.
+
+Store generated video metadata.
+
+Video processing engine will be integrated later.
+
+---
+
+# VIDEO FEATURES
+
+Manager:
+
+Preview Video
+
+Download Video
+
+Admin:
+
+Preview Any Video
+
+Download Any Video
+
+---
+
+# EXPORT FEATURES
+
+Manager Export
+
+Own Data Only
+
+Export:
+
+Excel
+
+CSV
+
+Date Range
+
+Today
+
+This Week
+
+This Month
+
+Custom Dates
+
+---
+
+# ADMIN EXPORTS
+
+Export All Managers
+
+Export Single Manager
+
+Export All Doctors
+
+Export Date Wise Data
+
+Export Analytics
+
+Excel and CSV Supported
+
+---
+
+# AUDIT LOGS
+
+Track:
+
+Manager Added Doctor
+
+Manager Edited Doctor
+
+Admin Exported Report
+
+Manager Downloaded Video
+
+Manager Logged In
+
+Admin Logged In
+
+Store timestamp and user information.
+
+---
+
+# DATABASE MODULES
+
+Users
+
+Admins
+
+Managers
+
+Doctors
+
+Videos
+
+Audit Logs
+
+Exports
+
+Analytics
+
+Dashboard Statistics
+
+---
+
+# PERFORMANCE REQUIREMENTS
+
+* Responsive on every screen size
+* Support 7000+ doctors
+* Pagination
+* Server-side filtering
+* Fast searching
+* Lazy loading
+* Optimized API calls
+* Production-ready database indexing
+
+---
+
+# FINAL GOAL
+
+Build a scalable, enterprise-grade Healthcare Doctor Management Platform for CIPLA's Defeat Hepatitis Campaign that allows Admins to manage managers, track campaign progress, export reports, monitor 7000+ doctors, and later integrate the automated doctor video generation system.

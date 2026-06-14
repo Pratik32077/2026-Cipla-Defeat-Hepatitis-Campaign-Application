@@ -44,6 +44,12 @@ export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
 }
 
+// Custom JWT logic
+const defaultAuthTokenGetter = () => {
+  return localStorage.getItem("cipla_token");
+};
+_authTokenGetter = defaultAuthTokenGetter;
+
 function isRequest(input: RequestInfo | URL): input is Request {
   return typeof Request !== "undefined" && input instanceof Request;
 }

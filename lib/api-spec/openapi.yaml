@@ -1,22 +1,33 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CIPLA Defeat Hepatitis Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: managers
+    description: Manager management
+  - name: doctors
+    description: Doctor management
+  - name: videos
+    description: Video management
+  - name: analytics
+    description: Analytics and reports
+  - name: audit
+    description: Audit logs
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,426 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        "401":
+          description: Unauthorized
+
+  /managers:
+    get:
+      operationId: listManagers
+      tags: [managers]
+      summary: List all managers
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: region
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of managers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagerListResponse"
+    post:
+      operationId: createManager
+      tags: [managers]
+      summary: Create manager
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagerInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Manager"
+
+  /managers/{id}:
+    get:
+      operationId: getManager
+      tags: [managers]
+      summary: Get manager by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Manager
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Manager"
+    put:
+      operationId: updateManager
+      tags: [managers]
+      summary: Update manager
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagerUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Manager"
+    delete:
+      operationId: deleteManager
+      tags: [managers]
+      summary: Delete manager
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+
+  /managers/{id}/toggle-status:
+    post:
+      operationId: toggleManagerStatus
+      tags: [managers]
+      summary: Activate or deactivate a manager
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Status toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Manager"
+
+  /managers/{id}/progress:
+    get:
+      operationId: getManagerProgress
+      tags: [managers]
+      summary: Get manager progress stats
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Manager progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagerProgress"
+
+  /doctors:
+    get:
+      operationId: listDoctors
+      tags: [doctors]
+      summary: List doctors
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: language
+          in: query
+          schema: { type: string }
+        - name: city
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: managerId
+          in: query
+          schema: { type: integer }
+        - name: dateFrom
+          in: query
+          schema: { type: string }
+        - name: dateTo
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of doctors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DoctorListResponse"
+    post:
+      operationId: createDoctor
+      tags: [doctors]
+      summary: Add a doctor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoctorInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doctor"
+
+  /doctors/{id}:
+    get:
+      operationId: getDoctor
+      tags: [doctors]
+      summary: Get doctor by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Doctor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doctor"
+    put:
+      operationId: updateDoctor
+      tags: [doctors]
+      summary: Update doctor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoctorUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doctor"
+
+  /videos:
+    get:
+      operationId: listVideos
+      tags: [videos]
+      summary: List videos
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: managerId
+          in: query
+          schema: { type: integer }
+        - name: doctorId
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: List of videos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoListResponse"
+
+  /videos/{id}:
+    get:
+      operationId: getVideo
+      tags: [videos]
+      summary: Get video by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Video
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+
+  /analytics/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [analytics]
+      summary: Get overall dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /analytics/leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [analytics]
+      summary: Get manager leaderboard
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Leaderboard"
+
+  /analytics/language-distribution:
+    get:
+      operationId: getLanguageDistribution
+      tags: [analytics]
+      summary: Language-wise doctor distribution
+      responses:
+        "200":
+          description: Distribution data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DistributionItem"
+
+  /analytics/daily-trend:
+    get:
+      operationId: getDailyTrend
+      tags: [analytics]
+      summary: Daily doctor addition trend
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Daily trend
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrendPoint"
+
+  /analytics/manager-stats:
+    get:
+      operationId: getManagerStats
+      tags: [analytics]
+      summary: Manager-wise stats for admin
+      responses:
+        "200":
+          description: Manager stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ManagerStatItem"
+
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit logs
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: limit
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogListResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +462,397 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/CurrentUser"
+
+    CurrentUser:
+      type: object
+      required: [id, name, role]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, manager]
+        employeeCode:
+          type: ["string", "null"]
+        region:
+          type: ["string", "null"]
+        headquarters:
+          type: ["string", "null"]
+        targetDoctors:
+          type: ["integer", "null"]
+
+    Manager:
+      type: object
+      required: [id, name, employeeCode, email, mobile, region, headquarters, username, isActive, targetDoctors, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        employeeCode:
+          type: string
+        email:
+          type: string
+        mobile:
+          type: string
+        region:
+          type: string
+        headquarters:
+          type: string
+        username:
+          type: string
+        isActive:
+          type: boolean
+        targetDoctors:
+          type: integer
+        createdAt:
+          type: string
+
+    ManagerInput:
+      type: object
+      required: [name, employeeCode, email, mobile, region, headquarters, username, password, targetDoctors]
+      properties:
+        name:
+          type: string
+        employeeCode:
+          type: string
+        email:
+          type: string
+        mobile:
+          type: string
+        region:
+          type: string
+        headquarters:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        targetDoctors:
+          type: integer
+
+    ManagerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        mobile:
+          type: string
+        region:
+          type: string
+        headquarters:
+          type: string
+        targetDoctors:
+          type: integer
+        isActive:
+          type: boolean
+
+    ManagerListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Manager"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    ManagerProgress:
+      type: object
+      required: [managerId, managerName, target, completed, pending, failed, progressPercent]
+      properties:
+        managerId:
+          type: integer
+        managerName:
+          type: string
+        target:
+          type: integer
+        completed:
+          type: integer
+        pending:
+          type: integer
+        failed:
+          type: integer
+        progressPercent:
+          type: number
+
+    Doctor:
+      type: object
+      required: [id, name, specialization, city, contactNumber, language, status, managerId, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        specialization:
+          type: string
+        city:
+          type: string
+        contactNumber:
+          type: string
+        language:
+          type: string
+        imageUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        managerId:
+          type: integer
+        managerName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DoctorInput:
+      type: object
+      required: [name, specialization, city, contactNumber, language]
+      properties:
+        name:
+          type: string
+        specialization:
+          type: string
+        city:
+          type: string
+        contactNumber:
+          type: string
+        language:
+          type: string
+        imageUrl:
+          type: string
+
+    DoctorUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        specialization:
+          type: string
+        city:
+          type: string
+        contactNumber:
+          type: string
+        language:
+          type: string
+        imageUrl:
+          type: string
+        status:
+          type: string
+
+    DoctorListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Doctor"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    Video:
+      type: object
+      required: [id, doctorId, doctorName, status, createdAt]
+      properties:
+        id:
+          type: integer
+        doctorId:
+          type: integer
+        doctorName:
+          type: string
+        managerId:
+          type: integer
+        managerName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        videoUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    VideoListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Video"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    DashboardStats:
+      type: object
+      required: [totalTargetDoctors, totalDoctorsAdded, remainingDoctors, overallProgressPercent, totalManagers, activeManagers, videosGenerated, pendingVideos, failedVideos, todayDoctorsAdded, todayVideosGenerated, todayActiveManagers]
+      properties:
+        totalTargetDoctors:
+          type: integer
+        totalDoctorsAdded:
+          type: integer
+        remainingDoctors:
+          type: integer
+        overallProgressPercent:
+          type: number
+        totalManagers:
+          type: integer
+        activeManagers:
+          type: integer
+        videosGenerated:
+          type: integer
+        pendingVideos:
+          type: integer
+        failedVideos:
+          type: integer
+        todayDoctorsAdded:
+          type: integer
+        todayVideosGenerated:
+          type: integer
+        todayActiveManagers:
+          type: integer
+        todayTopPerformer:
+          type: ["string", "null"]
+
+    Leaderboard:
+      type: object
+      required: [topPerformers, lowestPerformers]
+      properties:
+        topPerformers:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+        lowestPerformers:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+
+    LeaderboardEntry:
+      type: object
+      required: [managerId, managerName, region, doctorsAdded, target, progressPercent]
+      properties:
+        managerId:
+          type: integer
+        managerName:
+          type: string
+        region:
+          type: string
+        doctorsAdded:
+          type: integer
+        target:
+          type: integer
+        progressPercent:
+          type: number
+
+    DistributionItem:
+      type: object
+      required: [label, count]
+      properties:
+        label:
+          type: string
+        count:
+          type: integer
+
+    TrendPoint:
+      type: object
+      required: [date, count]
+      properties:
+        date:
+          type: string
+        count:
+          type: integer
+
+    ManagerStatItem:
+      type: object
+      required: [managerId, managerName, region, doctorsAdded, target, videosGenerated, pendingVideos, progressPercent]
+      properties:
+        managerId:
+          type: integer
+        managerName:
+          type: string
+        region:
+          type: string
+        doctorsAdded:
+          type: integer
+        target:
+          type: integer
+        videosGenerated:
+          type: integer
+        pendingVideos:
+          type: integer
+        progressPercent:
+          type: number
+
+    AuditLog:
+      type: object
+      required: [id, action, userId, userRole, userName, createdAt]
+      properties:
+        id:
+          type: integer
+        action:
+          type: string
+        userId:
+          type: integer
+        userRole:
+          type: string
+        userName:
+          type: string
+        details:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AuditLogListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
