@@ -1,0 +1,203 @@
+Yes, this should definitely be added because it matches your actual workflow much better.
+
+Add this updated section to the master prompt:
+
+# UPDATED DOCTOR VIDEO GENERATION WORKFLOW
+
+## ADD DOCTOR FLOW
+
+Manager Opens Add Doctor Form
+
+↓
+
+Fill Doctor Details
+
+* Doctor Name
+* Specialization
+* City
+* Contact Number
+* Language
+
+↓
+
+Upload Doctor Photo
+
+↓
+
+Click Generate Video
+
+↓
+
+Video Processing Starts
+
+↓
+
+Video Generated Successfully
+
+↓
+
+Preview Video
+
+Manager must be able to review the generated video before submitting the doctor record.
+
+Actions Available:
+
+* Preview Video
+* Regenerate Video (Optional)
+* Continue
+
+↓
+
+Submit Doctor
+
+↓
+
+Doctor Record Saved
+
+↓
+
+Doctor Appears In My Doctors
+
+---
+
+## ADD DOCTOR FORM
+
+Fields
+
+* Doctor Name *
+* Specialization *
+* City *
+* Contact Number *
+* Language *
+* Doctor Photo Upload *
+
+Buttons
+
+* Generate Video
+* Preview Video
+* Submit Doctor
+
+Rules
+
+* Submit Doctor button should remain disabled until video generation is completed successfully.
+* Manager must preview the generated video before final submission.
+* Contact Number must be unique across the entire system.
+* If duplicate contact number exists, prevent submission.
+
+---
+
+## MY DOCTORS PAGE
+
+Columns
+
+* Doctor Name
+* Specialization
+* City
+* Contact Number
+* Language
+* Video Status
+* Created Date
+
+Video Status
+
+* Uploaded
+* Processing
+* Generated
+* Submitted
+* Failed
+
+Actions
+
+* Review Video
+* Download Video
+
+---
+
+## MANAGER DASHBOARD
+
+Target Per Manager
+
+85 Doctors
+
+Dashboard Cards
+
+* Target Doctors = 85
+* Doctors Added
+* Remaining Doctors
+* Progress %
+* Videos Generated
+* Pending Videos
+
+Progress Formula
+
+Completed Doctors / 85 × 100
+
+Example
+
+Target = 85
+
+Completed = 45
+
+Remaining = 40
+
+Progress = 52.94%
+
+---
+
+## GLOBAL TARGET
+
+Total Managers = 83
+
+Target Per Manager = 85
+
+Global Target
+
+7055 Doctors
+
+Admin Dashboard
+
+* Total Target Doctors = 7055
+* Total Doctors Added
+* Remaining Doctors
+* Overall Progress %
+* Total Managers
+* Active Managers
+* Top Performing Managers
+
+Overall Progress Formula
+
+Total Added Doctors / 7055 × 100
+
+---
+
+## IMPORTANT
+
+There should NOT be a separate Video Management page.
+
+Video operations should be available directly inside:
+
+* My Doctors (Manager)
+* Doctors Page (Admin)
+
+Actions:
+
+* Preview Video
+* Download Video
+
+This keeps the workflow simple and avoids unnecessary pages.
+
+This version is better than the previous one because it enforces:
+
+```text
+Upload Photo
+↓
+Generate Video
+↓
+Preview Video
+↓
+Submit Doctor
+↓
+Saved in My Doctors
+```
+
+which matches exactly how your video generation system works.

@@ -1,20 +1,16 @@
 import { useState } from "react";
 import { useLogin } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import ciplaLogo from "@assets/WhatsApp_Image_2026-06-09_at_6.43.04_PM_1781461513497.jpeg";
-import defeatHepLogo from "@assets/logo1_(1)_1781461513495.png";
-import tenvirLogo from "@assets/logo2_(1)_1781461513496.png";
-import recordsLogo from "@assets/logo_(1)_1781461513494.png";
+import ibRecordsLogo   from "@assets/logo_(1)_1781526507622.png";
+import defeatHepLogo   from "@assets/logo1_(1)_1781526507624.png";
+import tenvirLogo      from "@assets/logo2_(1)_1781526507626.png";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   const loginMutation = useLogin({
@@ -23,10 +19,10 @@ export default function Login() {
         login(data.token, data.user);
         toast.success("Login successful");
       },
-      onError: (error) => {
+      onError: () => {
         toast.error("Invalid credentials. Please try again.");
-      }
-    }
+      },
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,59 +35,107 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="flex justify-center mb-4">
-          <img src={ciplaLogo} alt="Cipla" className="h-16 object-contain" />
-        </div>
-        
-        <Card className="border-0 shadow-xl rounded-xl overflow-hidden">
-          <div className="h-2 w-full bg-primary" />
-          <CardHeader className="space-y-1 text-center pt-8">
-            <CardTitle className="text-2xl font-bold tracking-tight text-foreground">Command Center</CardTitle>
-            <CardDescription>Enter your credentials to access the platform</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username / Employee Code</Label>
-                <Input 
-                  id="username" 
-                  placeholder="Enter your username" 
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#f0f0f0" }}>
+      <div className="w-full max-w-sm">
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)", backgroundColor: "#fff" }}
+        >
+          {/* ── Logo strip ── */}
+          <div className="flex items-center justify-between px-8 pt-8 pb-3 gap-4">
+            <img
+              src={ibRecordsLogo}
+              alt="International Book of Records"
+              className="h-14 w-14 object-contain flex-shrink-0"
+            />
+            <img
+              src={defeatHepLogo}
+              alt="Defeat Hepatitis"
+              className="h-12 object-contain flex-shrink-0"
+              style={{ maxWidth: 160 }}
+            />
+          </div>
+
+          {/* ── Tenvir AF ── */}
+          <div className="flex justify-center pb-4 px-8">
+            <img
+              src={tenvirLogo}
+              alt="Tenvir AF"
+              className="h-10 object-contain"
+              style={{ maxWidth: 180 }}
+            />
+          </div>
+
+          {/* ── Heading ── */}
+          <div className="text-center px-8 pb-6">
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Welcome Back</h1>
+            <p className="text-sm text-gray-500 mt-0.5">Access your dashboard</p>
+          </div>
+
+          {/* ── Form ── */}
+          <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
+            {/* Username */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Username</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <User className="w-4 h-4 text-white/80" />
+                </span>
+                <input
+                  type="text"
+                  placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="h-11"
                   disabled={loginMutation.isPending}
+                  className="w-full h-11 rounded-lg pl-10 pr-4 text-sm text-white placeholder-white/70 outline-none disabled:opacity-60"
+                  style={{ backgroundColor: "#7A1512", border: "none" }}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input 
-                  id="password" 
-                  type="password"
-                  placeholder="Enter your password" 
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Password</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <Lock className="w-4 h-4 text-white/80" />
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11"
                   disabled={loginMutation.isPending}
+                  className="w-full h-11 rounded-lg pl-10 pr-10 text-sm text-white placeholder-white/70 outline-none disabled:opacity-60"
+                  style={{ backgroundColor: "#7A1512", border: "none" }}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-              <Button type="submit" className="w-full h-11 text-base mt-2" disabled={loginMutation.isPending}>
-                {loginMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                Sign In
-              </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex flex-wrap justify-center gap-6 py-6 bg-muted/30">
-            <img src={defeatHepLogo} alt="Defeat Hepatitis" className="h-12 object-contain" />
-            <img src={tenvirLogo} alt="Tenvir AF" className="h-12 object-contain" />
-            <img src={recordsLogo} alt="International Book of Records" className="h-12 object-contain" />
-          </CardFooter>
-        </Card>
-        
-        <div className="text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} CIPLA Defeat Hepatitis Campaign. All rights reserved.
+            </div>
+
+            {/* Sign In */}
+            <button
+              type="submit"
+              disabled={loginMutation.isPending}
+              className="w-full h-11 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-60 mt-2"
+              style={{ backgroundColor: "#7A1512" }}
+            >
+              {loginMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Sign In
+            </button>
+          </form>
         </div>
+
+        <p className="text-center text-xs text-gray-400 mt-5">
+          &copy; {new Date().getFullYear()} CIPLA Defeat Hepatitis Campaign. All rights reserved.
+        </p>
       </div>
     </div>
   );
