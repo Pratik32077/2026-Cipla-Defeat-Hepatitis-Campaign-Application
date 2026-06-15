@@ -5,11 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, Download, PlayCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { format } from "date-fns";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
-} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Search, Download, PlayCircle, ChevronLeft, ChevronRight, FileSpreadsheet } from "lucide-react";
+import { format, subDays, startOfWeek, startOfMonth } from "date-fns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { exportManagerDoctors } from "@/lib/export-excel";
+import { useAuth } from "@/hooks/use-auth";
 
 const VIDEO_STATUS_MAP: Record<string, { label: string; cls: string }> = {
   pending:    { label: "Pending",    cls: "bg-yellow-100 text-yellow-800 border-yellow-200" },
@@ -20,44 +22,104 @@ const VIDEO_STATUS_MAP: Record<string, { label: string; cls: string }> = {
   submitted:  { label: "Submitted",  cls: "bg-teal-100 text-teal-800 border-teal-200" },
 };
 
+const DATE_PRESETS = [
+  { label: "All Doctors",      value: "all" },
+  { label: "Today",            value: "today" },
+  { label: "Yesterday",        value: "yesterday" },
+  { label: "This Week",        value: "week" },
+  { label: "This Month",       value: "month" },
+];
+
+function getDateRange(preset: string): { dateFrom?: string; dateTo?: string } {
+  const now = new Date();
+  const fmt = (d: Date) => d.toISOString();
+  switch (preset) {
+    case "today":     return { dateFrom: fmt(new Date(now.setHours(0,0,0,0))) };
+    case "yesterday": {
+      const y = subDays(new Date(), 1);
+      y.setHours(0,0,0,0);
+      const ye = subDays(new Date(), 1);
+      ye.setHours(23,59,59,999);
+      return { dateFrom: fmt(y), dateTo: fmt(ye) };
+    }
+    case "week":  return { dateFrom: fmt(startOfWeek(new Date(), { weekStartsOn: 1 })) };
+    case "month": return { dateFrom: fmt(startOfMonth(new Date())) };
+    default: return {};
+  }
+}
+
 export default function ManagerDoctors() {
-  const [search, setSearch]       = useState("");
-  const [page, setPage]           = useState(1);
+  const { user } = useAuth();
+  const [search, setSearch]         = useState("");
+  const [page, setPage]             = useState(1);
+  const [langFilter, setLangFilter] = useState("all");
+  const [statusFilter, setStatus]   = useState("all");
+  const [datePreset, setDatePreset] = useState("all");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
   const limit = 10;
 
+  const dateRange = getDateRange(datePreset);
+  const params: Record<string, any> = { page, limit };
+  if (search)                      params.search   = search;
+  if (langFilter !== "all")        params.language = langFilter;
+  if (statusFilter !== "all")      params.status   = statusFilter;
+  if (dateRange.dateFrom)          params.dateFrom = dateRange.dateFrom;
+  if (dateRange.dateTo)            params.dateTo   = dateRange.dateTo;
+
   const { data, isLoading } = useListDoctors(
-    { page, limit, search },
-    { query: { queryKey: getListDoctorsQueryKey({ page, limit, search }) } }
+    params,
+    { query: { queryKey: getListDoctorsQueryKey(params) } }
   );
 
   const { data: videosData } = useListVideos({ limit: 1000 });
-
   const videoMap = new Map<number, { status: string; videoUrl?: string | null }>();
-  videosData?.data?.forEach((v: any) => {
-    videoMap.set(v.doctorId, { status: v.status, videoUrl: v.videoUrl });
-  });
+  videosData?.data?.forEach((v: any) => videoMap.set(v.doctorId, { status: v.status, videoUrl: v.videoUrl }));
 
   const totalPages = data ? Math.ceil(data.total / limit) : 1;
 
-  function openPreview(url: string, name: string) {
-    setPreviewUrl(url);
-    setPreviewName(name);
+  async function handleExport() {
+    setIsExporting(true);
+    try {
+      await exportManagerDoctors(user?.name ?? "Manager", {
+        search: search || undefined,
+        language: langFilter !== "all" ? langFilter : undefined,
+        status:   statusFilter !== "all" ? statusFilter : undefined,
+        ...dateRange,
+      });
+      toast.success("Excel file downloaded successfully!");
+    } catch {
+      toast.error("Export failed. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Doctors</h1>
-        <p className="text-muted-foreground text-sm">All doctors you have registered for the campaign.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Doctors</h1>
+          <p className="text-muted-foreground text-sm">All doctors you have registered for the campaign.</p>
+        </div>
+        <Button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="bg-green-700 hover:bg-green-800 text-white flex-shrink-0"
+        >
+          {isExporting
+            ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Exporting…</>
+            : <><FileSpreadsheet className="h-4 w-4 mr-2" /> Export Excel</>
+          }
+        </Button>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          {/* Search bar */}
-          <div className="p-4 border-b flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-            <div className="relative w-full sm:w-72">
+          {/* Filters */}
+          <div className="p-4 border-b flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[180px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search doctors…"
@@ -66,9 +128,34 @@ export default function ManagerDoctors() {
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               />
             </div>
+            <Select value={datePreset} onValueChange={v => { setDatePreset(v); setPage(1); }}>
+              <SelectTrigger className="w-[145px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {DATE_PRESETS.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={langFilter} onValueChange={v => { setLangFilter(v); setPage(1); }}>
+              <SelectTrigger className="w-[130px]"><SelectValue placeholder="Language" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Languages</SelectItem>
+                {["Hindi","English","Marathi","Gujarati","Telugu","Tamil","Punjabi","Oriya","Malayalam","Kannada","Bengali","Assamese"].map(l => (
+                  <SelectItem key={l} value={l}>{l}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={v => { setStatus(v); setPage(1); }}>
+              <SelectTrigger className="w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="completed">Generated</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+              </SelectContent>
+            </Select>
             {data && (
-              <span className="text-xs text-muted-foreground flex-shrink-0">
-                {data.total} doctor{data.total !== 1 ? "s" : ""}
+              <span className="text-xs text-muted-foreground ml-auto flex-shrink-0">
+                {data.total} record{data.total !== 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -130,12 +217,8 @@ export default function ManagerDoctors() {
                           <div className="flex justify-end gap-1">
                             {canPreview && (
                               <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  title="Preview Video"
-                                  onClick={() => openPreview(vidUrl!, doctor.name)}
-                                >
+                                <Button variant="ghost" size="icon" title="Preview Video"
+                                  onClick={() => { setPreviewUrl(vidUrl!); setPreviewName(doctor.name); }}>
                                   <PlayCircle className="h-4 w-4 text-[#7A1512]" />
                                 </Button>
                                 <Button variant="ghost" size="icon" title="Download Video" asChild>
@@ -184,17 +267,14 @@ export default function ManagerDoctors() {
           {previewUrl && (
             <div className="rounded-xl overflow-hidden bg-black">
               <video key={previewUrl} controls autoPlay playsInline
-                className="w-full object-contain"
-                style={{ maxHeight: "70vh", aspectRatio: "9/16" }}>
+                className="w-full object-contain" style={{ maxHeight: "70vh", aspectRatio: "9/16" }}>
                 <source src={previewUrl} type="video/mp4" />
               </video>
             </div>
           )}
           {previewUrl && (
             <Button variant="outline" size="sm" className="w-full mt-2" asChild>
-              <a href={previewUrl} download>
-                <Download className="w-4 h-4 mr-2" /> Download Video
-              </a>
+              <a href={previewUrl} download><Download className="w-4 h-4 mr-2" /> Download Video</a>
             </Button>
           )}
         </DialogContent>

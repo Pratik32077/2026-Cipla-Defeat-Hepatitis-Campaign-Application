@@ -1,0 +1,343 @@
+# COMPLETE EXPORT SYSTEM REQUIREMENTS
+
+## EXPORT FUNCTIONALITY
+
+The platform must provide powerful Excel export functionality for both Admin and Manager roles.
+
+All exports should generate professional Excel (.xlsx) files with proper column headers, filters, timestamps, and downloadable reports.
+
+---
+
+# MANAGER EXPORT SYSTEM
+
+## LOCATION
+
+Page:
+
+My Doctors
+
+Position:
+
+Top Right Corner
+
+Button:
+
+Export Excel
+
+---
+
+## MANAGER EXPORT RULE
+
+A manager can ONLY export his own doctor records.
+
+Managers must never be able to export data belonging to other managers.
+
+---
+
+## MANAGER EXPORT FILTERS
+
+Before export, allow the following options:
+
+* All Doctors
+* Today's Doctors
+* Yesterday's Doctors
+* This Week
+* This Month
+* Custom Date Range
+
+Search Filters:
+
+* Doctor Name
+* Contact Number
+* City
+* Language
+* Status
+
+Export should respect currently applied filters.
+
+---
+
+## MANAGER EXCEL COLUMNS
+
+Export file should contain:
+
+* Doctor Name
+* Specialization
+* City
+* Contact Number
+* Language
+* Video Status
+* Created Date
+* Last Updated Date
+
+---
+
+## MANAGER EXPORT FILE NAME
+
+Example:
+
+Harshkumar_Patel_Doctors_2026_06_15.xlsx
+
+or
+
+Harshkumar_Patel_Today_Doctors.xlsx
+
+---
+
+# ADMIN EXPORT SYSTEM
+
+## EXPORT ALL MANAGERS
+
+LOCATION
+
+Managers Page
+
+Top Right Corner
+
+Button:
+
+Export All Managers
+
+---
+
+## MANAGER EXPORT DATA
+
+Columns:
+
+* Manager Name
+* Employee Code
+* Region
+* HQ
+* Email
+* Mobile Number
+* Target Doctors
+* Doctors Added
+* Remaining Doctors
+* Progress Percentage
+
+---
+
+## FILE NAME
+
+All_Managers_Report.xlsx
+
+---
+
+# EXPORT SINGLE MANAGER DATA
+
+LOCATION
+
+Manager Detail Page
+
+Top Right Corner
+
+Button:
+
+Export Manager Data
+
+---
+
+## EXPORT CONTENT
+
+Manager Information
+
+* Name
+* Employee Code
+* Region
+* HQ
+* Mobile
+* Email
+
+Performance Information
+
+* Target Doctors
+* Doctors Added
+* Remaining Doctors
+* Progress %
+
+Doctor Information
+
+All doctors belonging to that manager.
+
+---
+
+## FILE NAME
+
+Example:
+
+Harshkumar_Patel_Report.xlsx
+
+---
+
+# ADMIN DOCTORS EXPORT
+
+LOCATION
+
+Doctors Page
+
+Top Right Corner
+
+Button:
+
+Export Doctors
+
+---
+
+## FILTERS
+
+Allow export by:
+
+* Today
+* Yesterday
+* This Week
+* This Month
+* Custom Date Range
+
+Search:
+
+* Doctor Name
+* Contact Number
+
+Filters:
+
+* Language
+* Manager
+* Status
+* City
+
+---
+
+## EXPORT COLUMNS
+
+* Doctor Name
+* Specialization
+* City
+* Contact Number
+* Language
+* Manager Name
+* Status
+* Created Date
+
+---
+
+## FILE NAME
+
+Doctors_Report_2026_06_15.xlsx
+
+or
+
+Doctors_Report_June_2026.xlsx
+
+---
+
+# DASHBOARD REPORT EXPORT
+
+LOCATION
+
+Admin Dashboard
+
+Top Right Corner
+
+Button:
+
+Export Dashboard Report
+
+---
+
+## REPORT CONTENT
+
+Campaign Summary
+
+* Total Target Doctors
+* Total Doctors Added
+* Remaining Doctors
+* Overall Progress %
+* Total Managers
+* Active Managers
+
+Manager Summary
+
+* Top Performing Managers
+* Lowest Performing Managers
+
+Language Summary
+
+* Hindi Count
+* English Count
+* Marathi Count
+* Gujarati Count
+* Telugu Count
+* Tamil Count
+* Punjabi Count
+* Oriya Count
+* Malayalam Count
+* Kannada Count
+* Bengali Count
+
+---
+
+## FILE NAME
+
+Campaign_Overview_Report.xlsx
+
+---
+
+# EXPORT TECHNICAL REQUIREMENTS
+
+* Excel (.xlsx) format only
+* One-click download
+* Fast export performance
+* Support thousands of records
+* Preserve filters while exporting
+* Show loading indicator during export
+* Show success message after export
+* Mobile compatible export functionality
+* Desktop compatible export functionality
+* Tablet compatible export functionality
+
+---
+
+# SECURITY RULES
+
+Manager:
+
+Can export ONLY his own doctors.
+
+Admin:
+
+Can export:
+
+* All Managers
+* Single Manager
+* All Doctors
+* Filtered Doctors
+* Dashboard Reports
+
+Role-based restrictions must always be enforced.
+
+---
+
+# FINAL EXPORT LOCATIONS
+
+MANAGER
+
+✓ My Doctors Page
+→ Export Excel
+
+ADMIN
+
+✓ Dashboard
+→ Export Dashboard Report
+
+✓ Managers Page
+→ Export All Managers
+
+✓ Manager Detail Page
+→ Export Single Manager Data
+
+✓ Doctors Page
+→ Export Doctors Data
+
+Total Export Modules = 5
+
+All exports must be available as Excel downloads and must respect applied filters and permissions.

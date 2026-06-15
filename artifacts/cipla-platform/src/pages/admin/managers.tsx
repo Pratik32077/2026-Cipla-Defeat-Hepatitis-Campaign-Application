@@ -11,7 +11,9 @@ import { toast } from "sonner";
 import {
   Loader2, Plus, Search, Edit2, Trash2, ToggleLeft, ToggleRight,
   ChevronLeft, ChevronRight, UserCheck, UserX, Users, Filter,
+  FileSpreadsheet, Download,
 } from "lucide-react";
+import { exportAllManagers, exportSingleManager } from "@/lib/export-excel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -83,6 +85,8 @@ export default function AdminManagers() {
   const [addOpen, setAddOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Manager | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Manager | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportingId, setExportingId] = useState<number | null>(null);
   const limit = 20;
 
   const params: Record<string, any> = { page, limit };
@@ -150,6 +154,30 @@ export default function AdminManagers() {
     });
   }
 
+  async function handleExportAll() {
+    setIsExporting(true);
+    try {
+      await exportAllManagers();
+      toast.success("All managers exported successfully!");
+    } catch {
+      toast.error("Export failed. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  async function handleExportSingle(m: Manager) {
+    setExportingId(m.id);
+    try {
+      await exportSingleManager(m.id, m.name);
+      toast.success(`${m.name}'s data exported!`);
+    } catch {
+      toast.error("Export failed. Please try again.");
+    } finally {
+      setExportingId(null);
+    }
+  }
+
   function onAddSubmit(values: z.infer<typeof addSchema>) {
     createManager.mutate({ data: values });
   }
@@ -165,18 +193,30 @@ export default function AdminManagers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Managers</h1>
-          <p className="text-muted-foreground">Manage field executives and their doctor targets.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Managers</h1>
+          <p className="text-muted-foreground text-sm">Manage field executives and their doctor targets.</p>
         </div>
-        <Button
-          onClick={() => { addForm.reset(); setAddOpen(true); }}
-          className="bg-[#7A1512] hover:bg-[#5a0f0d] text-white"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Manager
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            onClick={handleExportAll}
+            disabled={isExporting}
+            className="bg-green-700 hover:bg-green-800 text-white"
+          >
+            {isExporting
+              ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Exporting…</>
+              : <><FileSpreadsheet className="mr-2 h-4 w-4" /> Export All Managers</>
+            }
+          </Button>
+          <Button
+            onClick={() => { addForm.reset(); setAddOpen(true); }}
+            className="bg-[#7A1512] hover:bg-[#5a0f0d] text-white"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Manager
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -310,6 +350,19 @@ export default function AdminManagers() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Export Manager Data"
+                            onClick={() => handleExportSingle(m)}
+                            disabled={exportingId === m.id}
+                            className="h-8 w-8"
+                          >
+                            {exportingId === m.id
+                              ? <Loader2 className="h-4 w-4 animate-spin text-green-600" />
+                              : <Download className="h-4 w-4 text-green-600" />
+                            }
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
