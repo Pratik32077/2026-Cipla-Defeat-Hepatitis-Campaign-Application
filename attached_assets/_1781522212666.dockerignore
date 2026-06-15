@@ -1,0 +1,10 @@
+frontend/
+backend/node_modules
+backend/uploads/*
+backend/outputs/*
+backend/tmp/*
+!backend/uploads/.gitkeep
+!backend/outputs/.gitkeep
+!backend/tmp/.gitkeep
+node_modules
+.git

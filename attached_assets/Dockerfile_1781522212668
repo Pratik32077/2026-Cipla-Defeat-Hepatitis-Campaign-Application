@@ -1,0 +1,22 @@
+FROM node:20-slim
+
+# Install FFmpeg
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install dependencies first (better Docker layer caching)
+COPY backend/package*.json ./
+RUN npm ci --production
+
+# Copy backend source
+COPY backend/ .
+
+# Create required directories
+RUN mkdir -p uploads outputs tmp
+
+EXPOSE 3001
+
+CMD ["node", "server.js"]

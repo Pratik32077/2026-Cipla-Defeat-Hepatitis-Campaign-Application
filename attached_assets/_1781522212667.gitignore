@@ -1,0 +1,16 @@
+node_modules/
+.next/
+*.log
+
+# Backend runtime dirs
+backend/uploads/*
+backend/outputs/*
+backend/tmp/*
+!backend/uploads/.gitkeep
+!backend/outputs/.gitkeep
+!backend/tmp/.gitkeep
+
+# Env files
+.env
+.env.local
+.env*.local
