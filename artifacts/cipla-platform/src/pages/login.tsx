@@ -42,27 +42,28 @@ export default function Login() {
           style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)", backgroundColor: "#fff" }}
         >
           {/* ── Logo strip ── */}
-          <div className="flex items-center justify-between px-8 pt-8 pb-3 gap-4">
+          <div className="flex items-center justify-between px-6 pt-8 pb-2 gap-3">
             <img
               src={ibRecordsLogo}
               alt="International Book of Records"
-              className="h-14 w-14 object-contain flex-shrink-0"
+              className="object-contain flex-shrink-0"
+              style={{ height: 130, width: 130 }}
             />
             <img
               src={defeatHepLogo}
               alt="Defeat Hepatitis"
-              className="h-12 object-contain flex-shrink-0"
-              style={{ maxWidth: 160 }}
+              className="object-contain flex-shrink-0"
+              style={{ height: 120, maxWidth: 220 }}
             />
           </div>
 
           {/* ── Tenvir AF ── */}
-          <div className="flex justify-center pb-4 px-8">
+          <div className="flex justify-center pb-5 px-6">
             <img
               src={tenvirLogo}
               alt="Tenvir AF"
-              className="h-10 object-contain"
-              style={{ maxWidth: 180 }}
+              className="object-contain"
+              style={{ height: 160, maxWidth: 280 }}
             />
           </div>
 
