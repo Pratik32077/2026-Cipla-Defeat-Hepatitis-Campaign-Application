@@ -6,8 +6,8 @@ import { useCreateDoctor } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import {
-  Upload, ImageIcon, X, Video, AlertCircle,
-  CheckCircle2, Film, RefreshCw, Download, Lock, Play, Loader2,
+  Loader2, Upload, ImageIcon, X, Video, Play, AlertCircle,
+  CheckCircle2, Film, RefreshCw, Download, Lock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 const SPECIALTY_OPTIONS = [
   "Consultant Gastroenterologist",
@@ -27,21 +28,10 @@ const SPECIALTY_OPTIONS = [
   "Other",
 ];
 
-const LANGUAGE_VIDEOS: Record<string, string> = {
-  Hindi:     "/videos/hindi.mp4",
-  English:   "/videos/english.mp4",
-  Marathi:   "/videos/marathi.mp4",
-  Gujarati:  "/videos/gujarati.mp4",
-  Telugu:    "/videos/telugu.mp4",
-  Tamil:     "/videos/tamil.mp4",
-  Punjabi:   "/videos/punjabi.mp4",
-  Oriya:     "/videos/oriya.mp4",
-  Malayalam: "/videos/malayalam.mp4",
-  Kannada:   "/videos/kannada.mp4",
-  Bengali:   "/videos/bengali.mp4",
-};
-
-const LANGUAGES = Object.keys(LANGUAGE_VIDEOS);
+const LANGUAGES = [
+  "Hindi", "English", "Marathi", "Gujarati", "Telugu",
+  "Tamil", "Punjabi", "Oriya", "Malayalam", "Kannada", "Bengali",
+];
 
 const formSchema = z.object({
   name:           z.string().min(2, "Name must be at least 2 characters"),
@@ -53,9 +43,21 @@ const formSchema = z.object({
 
 type VideoState =
   | { phase: "idle" }
-  | { phase: "loading" }
-  | { phase: "done"; videoUrl: string; language: string }
+  | { phase: "generating"; progress: number; step: string }
+  | { phase: "done"; videoUrl: string; processingTime: string }
   | { phase: "error"; message: string };
+
+const GENERATION_STEPS = [
+  "Uploading doctor photo…",
+  "Loading master template…",
+  "Compositing overlays…",
+  "Encoding video…",
+  "Finalising output…",
+];
+
+function getToken(): string | null {
+  return localStorage.getItem("cipla_token");
+}
 
 export default function ManagerAddDoctor() {
   const [, setLocation] = useLocation();
@@ -64,7 +66,8 @@ export default function ManagerAddDoctor() {
   const [videoState, setVideoState]       = useState<VideoState>({ phase: "idle" });
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [specialtyOther, setSpecialtyOther]       = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef    = useRef<HTMLInputElement>(null);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const videoGenerated = videoState.phase === "done";
 
@@ -115,6 +118,7 @@ export default function ManagerAddDoctor() {
     } else {
       form.setValue("specialization", specialtyOther, { shouldValidate: false });
     }
+    setVideoState({ phase: "idle" });
   }
 
   function handleOtherChange(val: string) {
@@ -122,28 +126,55 @@ export default function ManagerAddDoctor() {
     form.setValue("specialization", val, { shouldValidate: true });
   }
 
-  function handleLanguageChange(val: string) {
-    form.setValue("language", val, { shouldValidate: true });
-    setVideoState({ phase: "idle" });
-  }
-
-  function handleGenerateVideo() {
+  async function handleGenerateVideo() {
     const values = form.getValues();
-    if (!values.name || !values.specialization) {
-      toast.error("Please fill in Name and Specialty first.");
+    if (!imageBase64) { toast.error("Please upload a doctor photo first."); return; }
+    if (!values.name || !values.specialization || !values.language) {
+      toast.error("Please fill in Name, Specialty, and Language first.");
       return;
     }
-    const lang = values.language;
-    const videoUrl = LANGUAGE_VIDEOS[lang];
-    if (!videoUrl) {
-      setVideoState({ phase: "error", message: `No video template available for "${lang}". Please choose another language.` });
-      return;
+
+    setVideoState({ phase: "generating", progress: 0, step: GENERATION_STEPS[0] });
+
+    let progress = 0;
+    progressTimerRef.current = setInterval(() => {
+      progress = Math.min(progress + 1.4, 92);
+      const stepIdx = Math.min(
+        Math.floor((progress / 92) * (GENERATION_STEPS.length - 1)),
+        GENERATION_STEPS.length - 1
+      );
+      setVideoState({ phase: "generating", progress, step: GENERATION_STEPS[stepIdx] });
+    }, 600);
+
+    try {
+      const token = getToken();
+      const res = await fetch("/api/videos/generate-preview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          doctorName:  values.name,
+          designation: values.specialization,
+          language:    values.language,
+          imageBase64,
+        }),
+      });
+
+      if (progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
+
+      const data = await res.json();
+      if (!res.ok) {
+        setVideoState({ phase: "error", message: data.error || "Video generation failed." });
+        return;
+      }
+      setVideoState({ phase: "done", videoUrl: data.videoUrl, processingTime: data.processingTime });
+      toast.success("Video generated! You can now submit the doctor.");
+    } catch {
+      if (progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
+      setVideoState({ phase: "error", message: "Network error. Please try again." });
     }
-    setVideoState({ phase: "loading" });
-    setTimeout(() => {
-      setVideoState({ phase: "done", videoUrl, language: lang });
-      toast.success(`${lang} campaign video ready!`);
-    }, 800);
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -155,19 +186,19 @@ export default function ManagerAddDoctor() {
   const watchedSpec = form.watch("specialization");
   const watchedLang = form.watch("language");
   const watchedCity = form.watch("city");
-  const canGenerate = !!watchedName && !!watchedSpec && !!watchedLang;
-  const isLoading   = videoState.phase === "loading";
+  const canGenerate  = !!imageBase64 && !!watchedName && !!watchedSpec && !!watchedLang;
+  const isGenerating = videoState.phase === "generating";
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 px-4 sm:px-0">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Add Doctor</h1>
         <p className="text-muted-foreground text-sm">
-          Fill in details → select language → generate video → submit.
+          Complete all steps: fill details → upload photo → generate video → submit.
         </p>
       </div>
 
-      {/* Step pills */}
+      {/* Step progress */}
       <div className="flex items-center gap-2 text-xs font-medium">
         <StepPill n={1} label="Doctor Details" done={!!watchedName && !!watchedSpec && !!watchedCity} />
         <div className="h-px flex-1 bg-border" />
@@ -230,11 +261,10 @@ export default function ManagerAddDoctor() {
                     <FormMessage />
                   </FormItem>
                 )} />
-
                 <FormField control={form.control} name="language" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Video Language *</FormLabel>
-                    <Select onValueChange={handleLanguageChange} value={field.value}>
+                    <Select onValueChange={(v) => { field.onChange(v); setVideoState({ phase: "idle" }); }} value={field.value}>
                       <FormControl>
                         <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
                       </FormControl>
@@ -256,7 +286,7 @@ export default function ManagerAddDoctor() {
                 {imagePreview ? (
                   <div className="flex items-start gap-4">
                     <div className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-primary/30 group flex-shrink-0">
-                      <img src={imagePreview} alt="Doctor" className="w-full h-full object-cover" />
+                      <img src={imagePreview} alt="Doctor preview" className="w-full h-full object-cover" />
                       <button type="button" onClick={removeImage}
                         className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                         <X className="w-6 h-6 text-white" />
@@ -291,39 +321,40 @@ export default function ManagerAddDoctor() {
         </CardContent>
       </Card>
 
-      {/* ── Card 2: Campaign Video ── */}
+      {/* ── Card 2: Generate Campaign Video ── */}
       <Card className={`border-2 transition-colors ${videoGenerated ? "border-green-400/50" : "border-[#7A1512]/20"}`}>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Film className={`w-5 h-5 ${videoGenerated ? "text-green-600" : "text-[#7A1512]"}`} />
-            <CardTitle className="text-lg">Campaign Video</CardTitle>
+            <CardTitle className="text-lg">Generate Campaign Video</CardTitle>
             {videoGenerated && (
               <Badge className="ml-auto bg-green-100 text-green-700 border-green-200 text-xs">
-                <CheckCircle2 className="w-3 h-3 mr-1" /> Ready
+                <CheckCircle2 className="w-3 h-3 mr-1" /> Generated
               </Badge>
             )}
           </div>
           <CardDescription>
-            Select a language above and click Generate Video to load the campaign template.
+            Generates a personalised Defeat Hepatitis video with the doctor's photo, name and specialty.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
 
           {/* Readiness checklist */}
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <ReadinessItem label="Name"       ok={!!watchedName} />
-            <ReadinessItem label="Specialty"  ok={!!watchedSpec} />
-            <ReadinessItem label="Language"   ok={!!watchedLang} />
+          <div className="grid grid-cols-4 gap-2 text-xs">
+            <ReadinessItem label="Name"      ok={!!watchedName} />
+            <ReadinessItem label="Specialty" ok={!!watchedSpec} />
+            <ReadinessItem label="Language"  ok={!!watchedLang} />
+            <ReadinessItem label="Photo"     ok={!!imageBase64} />
           </div>
 
           {watchedLang && (
             <p className="text-sm text-muted-foreground flex items-center gap-1.5">
               <Video className="w-4 h-4" />
-              Language selected: <strong>{watchedLang}</strong>
+              Language: <strong>{watchedLang}</strong>
             </p>
           )}
 
-          {/* Generate button — idle or after error/regenerate */}
+          {/* Idle / error state — show Generate button */}
           {(videoState.phase === "idle" || videoState.phase === "error") && (
             <div className="space-y-3">
               {videoState.phase === "error" && (
@@ -339,41 +370,43 @@ export default function ManagerAddDoctor() {
             </div>
           )}
 
-          {/* Loading spinner */}
-          {isLoading && (
-            <div className="flex items-center gap-3 py-2">
-              <Loader2 className="w-5 h-5 animate-spin text-[#7A1512]" />
-              <span className="text-sm text-[#7A1512] font-medium">Loading {watchedLang} template…</span>
+          {/* Generating progress */}
+          {isGenerating && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin text-[#7A1512] flex-shrink-0" />
+                <span className="text-sm font-medium text-[#7A1512]">
+                  {videoState.phase === "generating" ? videoState.step : ""}
+                </span>
+              </div>
+              <Progress value={videoState.phase === "generating" ? videoState.progress : 0} className="h-2" />
+              <p className="text-xs text-muted-foreground">Takes 15–45 seconds. Keep this page open.</p>
             </div>
           )}
 
-          {/* Video player */}
+          {/* Done — video preview */}
           {videoState.phase === "done" && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-green-700">
                 <CheckCircle2 className="w-4 h-4" />
-                <span><strong>{videoState.language}</strong> campaign video loaded — preview below.</span>
+                <span>Generated in {videoState.processingTime} — preview below.</span>
               </div>
               <div className="rounded-xl overflow-hidden bg-black border border-border shadow">
-                <video
-                  key={videoState.videoUrl}
-                  controls
-                  playsInline
+                <video key={videoState.videoUrl} controls playsInline
                   className="w-full object-contain"
-                  style={{ maxHeight: "min(400px, 55vw)", aspectRatio: "9/16" }}
-                >
+                  style={{ maxHeight: "min(400px, 55vw)", aspectRatio: "9/16" }}>
                   <source src={videoState.videoUrl} type="video/mp4" />
                 </video>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button type="button" variant="outline" size="sm" asChild>
                   <a href={videoState.videoUrl} download>
-                    <Download className="w-4 h-4 mr-2" /> Download
+                    <Download className="w-4 h-4 mr-2" /> Download Video
                   </a>
                 </Button>
                 <Button type="button" variant="ghost" size="sm"
                   onClick={() => setVideoState({ phase: "idle" })}>
-                  <RefreshCw className="w-4 h-4 mr-2" /> Change Language
+                  <RefreshCw className="w-4 h-4 mr-2" /> Regenerate
                 </Button>
               </div>
             </div>
@@ -387,12 +420,12 @@ export default function ManagerAddDoctor() {
         <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5">
           <div>
             <p className="font-semibold text-sm">
-              {videoGenerated ? "Ready to submit!" : "Complete video step to submit"}
+              {videoGenerated ? "Ready to submit!" : "Complete video generation to submit"}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {videoGenerated
                 ? "Doctor record will be saved and appear in My Doctors."
-                : "The Submit button unlocks after the video is loaded."}
+                : "The Submit Doctor button unlocks after the video is generated."}
             </p>
           </div>
           <Button
