@@ -10,7 +10,6 @@ export interface DoctorUpdate {
   name?: string;
   specialization?: string;
   city?: string;
-  contactNumber?: string;
   language?: string;
   imageUrl?: string;
   status?: string;

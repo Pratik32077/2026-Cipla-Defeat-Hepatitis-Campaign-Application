@@ -606,7 +606,7 @@ components:
 
     Doctor:
       type: object
-      required: [id, name, specialization, city, contactNumber, language, status, managerId, createdAt]
+      required: [id, name, specialization, city, language, status, managerId, createdAt]
       properties:
         id:
           type: integer
@@ -617,7 +617,7 @@ components:
         city:
           type: string
         contactNumber:
-          type: string
+          type: ["string", "null"]
         language:
           type: string
         imageUrl:
@@ -636,15 +636,13 @@ components:
 
     DoctorInput:
       type: object
-      required: [name, specialization, city, contactNumber, language]
+      required: [name, specialization, city, language]
       properties:
         name:
           type: string
         specialization:
           type: string
         city:
-          type: string
-        contactNumber:
           type: string
         language:
           type: string
@@ -659,8 +657,6 @@ components:
         specialization:
           type: string
         city:
-          type: string
-        contactNumber:
           type: string
         language:
           type: string

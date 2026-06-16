@@ -22,7 +22,6 @@ router.get("/", async (req, res) => {
 
   const conditions = [];
 
-  // Managers can only see their own doctors
   if (req.user!.role === "manager") {
     conditions.push(eq(doctorsTable.managerId, req.user!.id));
   } else if (managerIdParam) {
@@ -30,9 +29,7 @@ router.get("/", async (req, res) => {
   }
 
   if (search) {
-    conditions.push(
-      sql`(${ilike(doctorsTable.name, `%${search}%`)} or ${ilike(doctorsTable.contactNumber, `%${search}%`)})`
-    );
+    conditions.push(ilike(doctorsTable.name, `%${search}%`));
   }
   if (language) conditions.push(eq(doctorsTable.language, language));
   if (city) conditions.push(ilike(doctorsTable.city, `%${city}%`));
@@ -48,7 +45,6 @@ router.get("/", async (req, res) => {
       name: doctorsTable.name,
       specialization: doctorsTable.specialization,
       city: doctorsTable.city,
-      contactNumber: doctorsTable.contactNumber,
       language: doctorsTable.language,
       imageUrl: doctorsTable.imageUrl,
       status: doctorsTable.status,
@@ -88,21 +84,12 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  // Check for duplicate contact number
-  const existing = await db.select().from(doctorsTable)
-    .where(eq(doctorsTable.contactNumber, parse.data.contactNumber)).limit(1);
-  if (existing.length > 0) {
-    res.status(409).json({ error: "This doctor already exists in the system." });
-    return;
-  }
-
   const [doctor] = await db.insert(doctorsTable).values({
     ...parse.data,
     managerId: req.user!.id,
     status: "pending",
   }).returning();
 
-  // Create associated video record
   await db.insert(videosTable).values({
     doctorId: doctor.id,
     managerId: req.user!.id,
@@ -112,12 +99,12 @@ router.post("/", async (req, res) => {
   await db.insert(auditLogsTable).values({
     action: "Manager Added Doctor",
     userId: req.user!.id, userRole: "manager", userName: req.user!.name,
-    details: `Added doctor ${doctor.name} (${doctor.contactNumber})`,
+    details: `Added doctor ${doctor.name} (${doctor.specialization})`,
   });
 
   res.status(201).json({
     id: doctor.id, name: doctor.name, specialization: doctor.specialization,
-    city: doctor.city, contactNumber: doctor.contactNumber, language: doctor.language,
+    city: doctor.city, language: doctor.language,
     imageUrl: doctor.imageUrl, status: doctor.status, managerId: doctor.managerId,
     managerName: req.user!.name,
     createdAt: doctor.createdAt.toISOString(),
@@ -132,7 +119,6 @@ router.get("/:id", async (req, res) => {
     name: doctorsTable.name,
     specialization: doctorsTable.specialization,
     city: doctorsTable.city,
-    contactNumber: doctorsTable.contactNumber,
     language: doctorsTable.language,
     imageUrl: doctorsTable.imageUrl,
     status: doctorsTable.status,

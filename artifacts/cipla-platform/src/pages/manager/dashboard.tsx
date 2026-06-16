@@ -4,7 +4,7 @@ import { Users, Stethoscope, Video, Loader2, Target, TrendingUp, Clock, AlertCir
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/use-auth";
 
-const MANAGER_TARGET = 85;
+const MANAGER_TARGET = 70;
 
 export default function ManagerDashboard() {
   const { user } = useAuth();

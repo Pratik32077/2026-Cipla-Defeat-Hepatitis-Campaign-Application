@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 import {
   Loader2, Upload, ImageIcon, X, Video, Play, AlertCircle,
-  CheckCircle2, Film, RefreshCw, Download, Lock
+  CheckCircle2, Film, RefreshCw, Download, Lock, ChevronDown
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -17,19 +17,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  specialization: z.string().min(2, "Specialization is required"),
-  city: z.string().min(2, "City is required"),
-  contactNumber: z.string().min(10, "Valid contact number required"),
-  language: z.string().min(1, "Language is required"),
-  imageUrl: z.string().optional(),
-});
+const SPECIALTY_OPTIONS = [
+  "Consultant Gastroenterologist",
+  "Senior Consultant Gastroenterologist",
+  "Consultant Gastro Surgeon",
+  "Consultant Hepatologist",
+  "Consultant Nephrologist",
+  "Consultant Physician",
+  "Consultant Cardiologist",
+  "Other",
+];
 
 const LANGUAGES = [
   "Hindi", "English", "Marathi", "Gujarati", "Telugu",
-  "Tamil", "Punjabi", "Oriya", "Malayalam", "Kannada", "Bengali", "Assamese"
+  "Tamil", "Punjabi", "Oriya", "Malayalam", "Kannada", "Bengali", "Assamese",
 ];
+
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  specialization: z.string().min(2, "Specialty is required"),
+  city: z.string().min(2, "City is required"),
+  language: z.string().min(1, "Language is required"),
+  imageUrl: z.string().optional(),
+});
 
 type VideoState =
   | { phase: "idle" }
@@ -54,6 +64,8 @@ export default function ManagerAddDoctor() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [videoState, setVideoState] = useState<VideoState>({ phase: "idle" });
+  const [specialtyOther, setSpecialtyOther] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -61,7 +73,7 @@ export default function ManagerAddDoctor() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", specialization: "", city: "", contactNumber: "", language: "", imageUrl: "" },
+    defaultValues: { name: "", specialization: "", city: "", language: "", imageUrl: "" },
   });
 
   const createDoctor = useCreateDoctor({
@@ -71,7 +83,7 @@ export default function ManagerAddDoctor() {
         setLocation("/manager/doctors");
       },
       onError: (err: any) => {
-        const msg = err?.data?.error || "Failed to add doctor. Contact number may already exist.";
+        const msg = err?.data?.error || "Failed to add doctor.";
         toast.error(msg);
       },
     },
@@ -98,11 +110,27 @@ export default function ManagerAddDoctor() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  function handleSpecialtyChange(val: string) {
+    setSelectedSpecialty(val);
+    if (val !== "Other") {
+      form.setValue("specialization", val, { shouldValidate: true });
+      setSpecialtyOther("");
+    } else {
+      form.setValue("specialization", specialtyOther, { shouldValidate: false });
+    }
+    setVideoState({ phase: "idle" });
+  }
+
+  function handleOtherChange(val: string) {
+    setSpecialtyOther(val);
+    form.setValue("specialization", val, { shouldValidate: true });
+  }
+
   async function handleGenerateVideo() {
     const values = form.getValues();
     if (!imageBase64) { toast.error("Please upload a doctor photo first."); return; }
     if (!values.name || !values.specialization || !values.language) {
-      toast.error("Please fill in Name, Specialization, and Language first.");
+      toast.error("Please fill in Name, Specialty, and Language first.");
       return;
     }
 
@@ -137,17 +165,10 @@ export default function ManagerAddDoctor() {
       if (progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
 
       const data = await res.json();
-
       if (!res.ok) {
-        setVideoState({
-          phase: "error",
-          message: data.code === "MASTER_VIDEO_MISSING"
-            ? `Master video not configured for "${values.language}".`
-            : data.error || "Video generation failed.",
-        });
+        setVideoState({ phase: "error", message: data.error || "Video generation failed." });
         return;
       }
-
       setVideoState({ phase: "done", videoUrl: data.videoUrl, processingTime: data.processingTime });
       toast.success("Video generated! You can now submit the doctor.");
     } catch {
@@ -178,7 +199,7 @@ export default function ManagerAddDoctor() {
 
       {/* Step progress */}
       <div className="flex items-center gap-2 text-xs font-medium">
-        <StepPill n={1} label="Doctor Details" done={!!watchedName && !!watchedSpec && !!form.watch("city") && !!form.watch("contactNumber")} />
+        <StepPill n={1} label="Doctor Details" done={!!watchedName && !!watchedSpec && !!form.watch("city")} />
         <div className="h-px flex-1 bg-border" />
         <StepPill n={2} label="Upload Photo" done={!!imageBase64} />
         <div className="h-px flex-1 bg-border" />
@@ -204,28 +225,39 @@ export default function ManagerAddDoctor() {
                 </FormItem>
               )} />
 
+              {/* Specialty dropdown */}
+              <FormField control={form.control} name="specialization" render={() => (
+                <FormItem>
+                  <FormLabel>Specialty *</FormLabel>
+                  <Select onValueChange={handleSpecialtyChange} value={selectedSpecialty}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select specialty" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {SPECIALTY_OPTIONS.map(opt => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedSpecialty === "Other" && (
+                    <Input
+                      className="mt-2"
+                      placeholder="Enter specialty (e.g. Consultant Diabetologist)"
+                      value={specialtyOther}
+                      onChange={e => handleOtherChange(e.target.value)}
+                    />
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )} />
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField control={form.control} name="specialization" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Specialization *</FormLabel>
-                    <FormControl><Input placeholder="Hepatologist" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
                 <FormField control={form.control} name="city" render={({ field }) => (
                   <FormItem>
                     <FormLabel>City *</FormLabel>
                     <FormControl><Input placeholder="Mumbai" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField control={form.control} name="contactNumber" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contact Number *</FormLabel>
-                    <FormControl><Input placeholder="+91 9876543210" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -251,7 +283,6 @@ export default function ManagerAddDoctor() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Doctor Photo *</label>
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-
                 {imagePreview ? (
                   <div className="flex items-start gap-4">
                     <div className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-primary/30 group flex-shrink-0">
@@ -301,16 +332,12 @@ export default function ManagerAddDoctor() {
               </Badge>
             )}
           </div>
-          <CardDescription>
-            Generate the personalized Defeat Hepatitis video using the photo and details above.
-          </CardDescription>
+          <CardDescription>Generate the personalized Defeat Hepatitis video using the photo and details above.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-
-          {/* Readiness checklist */}
           <div className="grid grid-cols-3 gap-2 text-xs">
             <ReadinessItem label="Name" ok={!!watchedName} />
-            <ReadinessItem label="Specialization" ok={!!watchedSpec} />
+            <ReadinessItem label="Specialty" ok={!!watchedSpec} />
             <ReadinessItem label="Photo" ok={!!imageBase64} />
           </div>
 
@@ -321,7 +348,6 @@ export default function ManagerAddDoctor() {
             </p>
           )}
 
-          {/* idle */}
           {videoState.phase === "idle" && (
             <Button type="button" onClick={handleGenerateVideo} disabled={!canGenerate}
               className="w-full sm:w-auto bg-[#7A1512] hover:bg-[#5a0f0d] text-white disabled:opacity-50">
@@ -329,19 +355,19 @@ export default function ManagerAddDoctor() {
             </Button>
           )}
 
-          {/* generating */}
           {isGenerating && (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <Loader2 className="w-5 h-5 animate-spin text-[#7A1512] flex-shrink-0" />
-                <span className="text-sm font-medium text-[#7A1512]">{videoState.phase === "generating" ? videoState.step : ""}</span>
+                <span className="text-sm font-medium text-[#7A1512]">
+                  {videoState.phase === "generating" ? videoState.step : ""}
+                </span>
               </div>
               <Progress value={videoState.phase === "generating" ? videoState.progress : 0} className="h-2" />
               <p className="text-xs text-muted-foreground">Takes 15–45 seconds. Keep this page open.</p>
             </div>
           )}
 
-          {/* error */}
           {videoState.phase === "error" && (
             <div className="space-y-3">
               <div className="flex items-start gap-3 rounded-lg bg-destructive/10 border border-destructive/20 p-3">
@@ -354,7 +380,6 @@ export default function ManagerAddDoctor() {
             </div>
           )}
 
-          {/* done */}
           {videoState.phase === "done" && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-green-700">
@@ -435,13 +460,9 @@ function StepPill({ n, label, done, active }: { n: number; label: string; done: 
 function ReadinessItem({ label, ok }: { label: string; ok: boolean }) {
   return (
     <div className={`flex items-center gap-1.5 text-xs rounded-md px-2 py-1.5 border ${
-      ok ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-400"
-         : "bg-muted border-border text-muted-foreground"
+      ok ? "bg-green-50 border-green-200 text-green-700" : "bg-muted border-border text-muted-foreground"
     }`}>
-      {ok
-        ? <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-        : <div className="w-3.5 h-3.5 rounded-full border border-current flex-shrink-0" />
-      }
+      {ok ? <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" /> : <div className="w-3.5 h-3.5 rounded-full border border-current flex-shrink-0" />}
       <span>{label}</span>
     </div>
   );

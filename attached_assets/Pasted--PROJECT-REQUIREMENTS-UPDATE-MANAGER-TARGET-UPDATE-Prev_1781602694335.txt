@@ -1,0 +1,240 @@
+# PROJECT REQUIREMENTS UPDATE
+
+## MANAGER TARGET UPDATE
+
+Previous Target:
+
+85 Doctors Per Manager
+
+Updated Target:
+
+70 Doctors Per Manager
+
+Total Managers:
+
+83
+
+Global Campaign Target:
+
+83 × 70 = 5810 Doctors
+
+---
+
+## MANAGER DASHBOARD UPDATE
+
+Dashboard Cards
+
+* Target Doctors = 70
+* Doctors Added
+* Remaining Doctors
+* Progress %
+* Videos Generated
+* Pending Videos
+
+Progress Formula
+
+Completed Doctors / 70 × 100
+
+Example
+
+Target = 70
+
+Completed = 35
+
+Remaining = 35
+
+Progress = 50%
+
+---
+
+## ADMIN DASHBOARD UPDATE
+
+Global Campaign Overview
+
+Total Managers = 83
+
+Target Per Manager = 70
+
+Global Target = 5810 Doctors
+
+Dashboard should display:
+
+* Total Target Doctors = 5810
+* Total Doctors Added
+* Remaining Doctors
+* Overall Progress %
+* Total Managers
+* Active Managers
+
+Overall Progress Formula
+
+Total Doctors Added / 5810 × 100
+
+---
+
+# ADD DOCTOR FORM UPDATE
+
+## REMOVE FIELD
+
+Remove:
+
+* Contact Number
+
+This field is no longer required anywhere in the doctor creation workflow.
+
+Remove it from:
+
+* Add Doctor Form
+* Edit Doctor Form
+* Doctor Table
+* Doctor Details Page
+* Export Reports
+* Search Filters
+* Database Schema
+
+---
+
+## ADD NEW FIELD
+
+Add New Field:
+
+Specialty *
+
+Field Type:
+
+Dropdown Select
+
+Required:
+
+Yes
+
+---
+
+## SPECIALTY OPTIONS
+
+* Consultant Gastroenterologist
+* Senior Consultant Gastroenterologist
+* Consultant Gastro Surgeon
+* Consultant Hepatologist
+* Consultant Nephrologist
+* Consultant Physician
+* Consultant Cardiologist
+* Other
+
+---
+
+## OTHER OPTION LOGIC
+
+If user selects:
+
+Other
+
+Then automatically display:
+
+Custom Specialty Text Field
+
+Field Label:
+
+Enter Specialty
+
+Example:
+
+Consultant Diabetologist
+
+Consultant Pulmonologist
+
+Senior Internal Medicine Specialist
+
+etc.
+
+This field becomes mandatory only when "Other" is selected.
+
+---
+
+## UPDATED ADD DOCTOR FORM
+
+Fields
+
+* Doctor Name *
+* Specialty *
+* City *
+* Language *
+* Doctor Photo Upload *
+
+Buttons
+
+* Generate Video
+* Preview Video
+* Submit Doctor
+
+---
+
+## UPDATED MY DOCTORS TABLE
+
+Columns
+
+* Doctor Name
+* Specialty
+* City
+* Language
+* Video Status
+* Created Date
+
+Actions
+
+* Review
+* Download
+
+---
+
+## UPDATED ADMIN DOCTORS TABLE
+
+Columns
+
+* Doctor Name
+* Specialty
+* City
+* Language
+* Manager Name
+* Status
+* Created Date
+
+Actions
+
+* View
+* Download
+
+---
+
+## UPDATED EXPORT REPORTS
+
+Remove:
+
+* Contact Number
+
+Add:
+
+* Specialty
+
+All Excel exports should now include:
+
+* Doctor Name
+* Specialty
+* City
+* Language
+* Status
+* Created Date
+* Manager Name (Admin exports only)
+
+---
+
+## VIDEO GENERATION DATA
+
+Doctor video generation should use:
+
+* Doctor Name
+* Specialty
+* Doctor Photo
+* Language
+
+The selected Specialty should automatically appear in all generated video templates wherever doctor designation/specialization is displayed.

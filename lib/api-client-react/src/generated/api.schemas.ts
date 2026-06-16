@@ -109,7 +109,8 @@ export interface Doctor {
   name: string;
   specialization: string;
   city: string;
-  contactNumber: string;
+  /** @nullable */
+  contactNumber?: string | null;
   language: string;
   /** @nullable */
   imageUrl?: string | null;
@@ -125,7 +126,6 @@ export interface DoctorInput {
   name: string;
   specialization: string;
   city: string;
-  contactNumber: string;
   language: string;
   imageUrl?: string;
 }
@@ -134,7 +134,6 @@ export interface DoctorUpdate {
   name?: string;
   specialization?: string;
   city?: string;
-  contactNumber?: string;
   language?: string;
   imageUrl?: string;
   status?: string;

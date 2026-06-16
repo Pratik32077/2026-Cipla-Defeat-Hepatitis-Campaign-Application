@@ -12,7 +12,8 @@ export interface Doctor {
   name: string;
   specialization: string;
   city: string;
-  contactNumber: string;
+  /** @nullable */
+  contactNumber?: string | null;
   language: string;
   /** @nullable */
   imageUrl?: string | null;

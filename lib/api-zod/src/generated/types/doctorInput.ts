@@ -10,7 +10,6 @@ export interface DoctorInput {
   name: string;
   specialization: string;
   city: string;
-  contactNumber: string;
   language: string;
   imageUrl?: string;
 }

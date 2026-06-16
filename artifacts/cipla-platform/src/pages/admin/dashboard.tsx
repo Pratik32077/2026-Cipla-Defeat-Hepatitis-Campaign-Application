@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { exportDashboardReport } from "@/lib/export-excel";
 
-const GLOBAL_TARGET = 7055;
+const GLOBAL_TARGET = 5810;
 
 export default function AdminDashboard() {
   const [isExporting, setIsExporting] = useState(false);
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
             <div>
               <span className="text-sm font-semibold">Overall Campaign Progress</span>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Target: 83 managers × 85 doctors = {GLOBAL_TARGET.toLocaleString()} doctors
+                Target: 83 managers × 70 doctors = {GLOBAL_TARGET.toLocaleString()} doctors
               </p>
             </div>
             <span className="text-2xl font-bold text-[#7A1512]">{progress}%</span>
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
 
       {/* Stat grid */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <StatCard title="Total Target"       value={GLOBAL_TARGET.toLocaleString()} icon={<Target className="h-4 w-4 text-muted-foreground" />} sub="83 managers × 85" />
+        <StatCard title="Total Target"       value={GLOBAL_TARGET.toLocaleString()} icon={<Target className="h-4 w-4 text-muted-foreground" />} sub="83 managers × 70" />
         <StatCard title="Doctors Enrolled"   value={added.toLocaleString()} icon={<Users className="h-4 w-4 text-muted-foreground" />} sub={`${remaining.toLocaleString()} remaining`} highlight />
         <StatCard title="Active Managers"    value={stats.activeManagers ?? 0} icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />} sub={`of ${stats.totalManagers ?? 0} total`} highlight />
         <StatCard title="Videos Generated"   value={stats.videosGenerated ?? 0} icon={<Video className="h-4 w-4 text-muted-foreground" />} sub={`${stats.pendingVideos ?? 0} pending`} />

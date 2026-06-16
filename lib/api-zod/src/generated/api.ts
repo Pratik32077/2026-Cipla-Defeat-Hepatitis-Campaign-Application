@@ -222,7 +222,7 @@ export const ListDoctorsResponse = zod.object({
   "name": zod.string(),
   "specialization": zod.string(),
   "city": zod.string(),
-  "contactNumber": zod.string(),
+  "contactNumber": zod.string().nullish(),
   "language": zod.string(),
   "imageUrl": zod.string().nullish(),
   "status": zod.enum(['pending', 'processing', 'completed', 'failed']),
@@ -244,7 +244,6 @@ export const CreateDoctorBody = zod.object({
   "name": zod.string(),
   "specialization": zod.string(),
   "city": zod.string(),
-  "contactNumber": zod.string(),
   "language": zod.string(),
   "imageUrl": zod.string().optional()
 })
@@ -262,7 +261,7 @@ export const GetDoctorResponse = zod.object({
   "name": zod.string(),
   "specialization": zod.string(),
   "city": zod.string(),
-  "contactNumber": zod.string(),
+  "contactNumber": zod.string().nullish(),
   "language": zod.string(),
   "imageUrl": zod.string().nullish(),
   "status": zod.enum(['pending', 'processing', 'completed', 'failed']),
@@ -284,7 +283,6 @@ export const UpdateDoctorBody = zod.object({
   "name": zod.string().optional(),
   "specialization": zod.string().optional(),
   "city": zod.string().optional(),
-  "contactNumber": zod.string().optional(),
   "language": zod.string().optional(),
   "imageUrl": zod.string().optional(),
   "status": zod.string().optional()
@@ -295,7 +293,7 @@ export const UpdateDoctorResponse = zod.object({
   "name": zod.string(),
   "specialization": zod.string(),
   "city": zod.string(),
-  "contactNumber": zod.string(),
+  "contactNumber": zod.string().nullish(),
   "language": zod.string(),
   "imageUrl": zod.string().nullish(),
   "status": zod.enum(['pending', 'processing', 'completed', 'failed']),

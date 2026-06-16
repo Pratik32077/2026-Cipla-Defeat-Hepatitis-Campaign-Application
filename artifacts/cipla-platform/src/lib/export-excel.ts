@@ -68,11 +68,11 @@ export async function exportManagerDoctors(
   const doctors = data.data ?? [];
 
   const headers = [
-    "Doctor Name", "Specialization", "City", "Contact Number",
+    "Doctor Name", "Specialty", "City",
     "Language", "Video Status", "Created Date", "Last Updated Date",
   ];
   const rows = doctors.map((d: any) => [
-    d.name, d.specialization, d.city, d.contactNumber,
+    d.name, d.specialization, d.city,
     d.language, d.status?.toUpperCase() ?? "PENDING",
     fmtDate(d.createdAt), fmtDate(d.updatedAt),
   ]);
@@ -147,11 +147,11 @@ export async function exportSingleManager(managerId: number, managerName: string
 
   // Sheet 2: Doctors list
   const docHeaders = [
-    "Doctor Name", "Specialization", "City", "Contact Number",
+    "Doctor Name", "Specialty", "City",
     "Language", "Video Status", "Created Date",
   ];
   const docRows = doctors.map((d: any) => [
-    d.name, d.specialization, d.city, d.contactNumber,
+    d.name, d.specialization, d.city,
     d.language, d.status?.toUpperCase() ?? "PENDING", fmtDate(d.createdAt),
   ]);
   XLSX.utils.book_append_sheet(wb, makeSheet(docHeaders, docRows), "Doctors");
@@ -173,11 +173,11 @@ export async function exportAdminDoctors(filters?: {
   const doctors = data.data ?? [];
 
   const headers = [
-    "Doctor Name", "Specialization", "City", "Contact Number",
+    "Doctor Name", "Specialty", "City",
     "Language", "Manager Name", "Video Status", "Created Date",
   ];
   const rows = doctors.map((d: any) => [
-    d.name, d.specialization, d.city, d.contactNumber,
+    d.name, d.specialization, d.city,
     d.language, d.managerName ?? "", d.status?.toUpperCase() ?? "PENDING", fmtDate(d.createdAt),
   ]);
 
