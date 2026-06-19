@@ -32,5 +32,8 @@ app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use("/api/video-outputs", express.static("/tmp/cipla-video-outputs"));
 
 app.use("/api", router);
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
 
 export default app;

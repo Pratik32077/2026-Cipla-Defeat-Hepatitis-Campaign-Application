@@ -366,7 +366,24 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
+  if (typeof window !== "undefined") {
+    console.info("customFetch request", {
+      method,
+      url: requestInfo.url,
+      body: init.body,
+      headers: Array.from(headers.entries()),
+    });
+  }
+
   const response = await fetch(input, { ...init, method, headers });
+
+  if (typeof window !== "undefined") {
+    console.info("customFetch response", {
+      url: requestInfo.url,
+      status: response.status,
+      statusText: response.statusText,
+    });
+  }
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
